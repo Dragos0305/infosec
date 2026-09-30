@@ -8,18 +8,18 @@ TLS (Transport Layer Security) este un protocol criptografic care asigură confi
 
 ## De ce avem nevoie de TLS?
 
-Fără un protocol de securitate, traficul de rețea circulă în clar și poate fi citit sau modificat de oricine se află pe drumul dintre client și server (de exemplu, un atacator aflat în aceeași rețea Wi-Fi). TLS rezolvă trei probleme fundamentale:
+Fără un astfel de protocol, traficul de rețea circulă în clar și poate fi citit sau modificat de oricine se află pe canalul de comunicare dintre client și server (de exemplu, un atacator aflat în aceeași rețea Wi-Fi). TLS rezolvă trei probleme fundamentale:
 
 - **Confidențialitate** — datele sunt criptate, astfel încât un atacator care interceptează traficul nu poate citi conținutul.
 - **Integritate** — orice modificare a datelor în tranzit este detectată printr-un cod de autentificare a mesajului (MAC) sau printr-un mod criptografic autentificat (AEAD).
 - **Autentificare** — clientul poate verifica identitatea serverului (și opțional, invers) folosind certificate digitale semnate de o autoritate de certificare.
 
 !!! note "TLS nu este o soluție universală"
-    TLS protejează datele **în tranzit**. Nu protejează datele stocate pe disc, nu previne atacurile de tip phishing și nu garantează că serverul cu care vorbești este de încredere — doar că este cel care pretinde a fi.
+    TLS protejează datele **în tranzit**. Nu protejează datele stocate pe disc, nu previne atacurile de tip phishing și nu garantează că serverul cu care interactionezi este de încredere — doar că este cel care pretinde a fi.
 
 ## Poziția TLS în stiva de rețea
 
-TLS se situează între stratul de transport (TCP) și protocoalele de aplicație (HTTP, SMTP, FTP etc.), oferind un canal securizat peste care acestea pot rula neschimbate.
+TLS se situează între nivelul transport (TCP) și protocoalele de aplicație (HTTP, SMTP, FTP etc.), oferind un canal securizat peste care acestea pot rula neschimbate.
 
 ```mermaid
 graph TD
@@ -47,16 +47,16 @@ TLS 1.3 simplifică semnificativ protocolul: elimină algoritmii criptografici s
 - **Certificat digital (X.509)** — conține cheia publică a serverului și identitatea acestuia, semnate digital.
 - **Autoritate de certificare (CA)** — o entitate de încredere care semnează certificatele și le validează identitatea.
 - **Chei asimetrice** — o pereche cheie publică / cheie privată, folosită la începutul conexiunii pentru autentificare și schimb de chei.
-- **Chei simetrice de sesiune** — generate în timpul handshake-ului, folosite pentru a cripta efectiv datele, deoarece criptarea simetrică este mult mai rapidă decât cea asimetrică.
+- **Chei simetrice de sesiune** — generate în timpul handshake-ului, folosite pentru a cripta efectiv datele.
 - **MAC / AEAD** — mecanisme care garantează integritatea și autenticitatea datelor (de exemplu, AES-GCM combină criptarea și autentificarea într-un singur pas).
 
 ## Lanțul de încredere (certificate chain)
 
-Un certificat de server nu este verificat izolat, ci printr-un lanț de semnături care urcă până la o autoritate rădăcină în care sistemul de operare sau browserul are deja încredere.
+Un certificat nu este verificat izolat, ci printr-un lanț de semnături care urcă până la o autoritate rădăcină în care sistemul de operare sau browserul are deja încredere.
 
 ```mermaid
 graph TD
-    Root["Autoritate rădăcină (Root CA)<br/>de încredere în sistemul de operare"] --> Intermediate["Autoritate intermediară (Intermediate CA)"]
+    Root["Autoritate rădăcină (Root CA)"] --> Intermediate["Autoritate intermediară (Intermediate CA)"]
     Intermediate --> Leaf["Certificat server<br/>(ex: exemplu.ro)"]
 ```
 
@@ -83,7 +83,7 @@ sequenceDiagram
 
 ## Handshake-ul TLS 1.3
 
-TLS 1.3 reduce handshake-ul la **un singur drum-întors (1-RTT)**, deoarece clientul trimite ghicit cheile de schimb (key share) odată cu primul mesaj.
+TLS 1.3 reduce handshake-ul la **un singur drum-întors (1-RTT)**, deoarece clientul trimite cheile de schimb (key share) odată cu primul mesaj.
 
 ```mermaid
 sequenceDiagram
@@ -156,7 +156,7 @@ Secretul brut `S` nu este folosit direct pentru criptare. El trece printr-o func
 Fiecare parte trimite un mesaj `Finished`, care conține un HMAC calculat peste **transcriptul complet** al handshake-ului (toate mesajele schimbate până în acel punct), folosind o cheie derivată din `S`. Dacă un atacator ar fi modificat orice mesaj anterior din handshake (de exemplu, ar fi încercat să forțeze un cipher suite mai slab), transcriptul ar diferi între client și server, iar verificarea `Finished` ar eșua — conexiunea este abandonată.
 
 !!! note "De ce contează caracterul efemer (forward secrecy)"
-    Deoarece `a` și `b` sunt generate aleator pentru fiecare conexiune și șterse imediat după, chiar dacă cheia privată **pe termen lung** a serverului (cea din certificat) ar fi compromisă ulterior, un atacator tot nu ar putea recalcula `S` pentru conexiuni trecute — nu mai există `a` și `b` nicăieri. Această proprietate se numește **forward secrecy** și este motivul pentru care cipher suite-urile fără `E` (schimb de chei bazat direct pe RSA, folosit în TLS 1.2 vechi) sunt considerate mai slabe: acolo, secretul era criptat direct cu cheia publică pe termen lung a serverului, deci compromiterea acesteia ulterior permite decriptarea retroactivă a **oricărei** conversații înregistrate anterior.
+    Deoarece `a` și `b` sunt generate aleator pentru fiecare conexiune și șterse imediat după, chiar dacă cheia privată **pe termen lung** a serverului (cea din certificat) ar fi compromisă ulterior, un atacator tot nu ar putea recalcula `S` pentru conexiuni trecute —  `a` și `b` nu mai exista. Această proprietate se numește **forward secrecy** și este motivul pentru care cipher suite-urile fără `E` (schimb de chei bazat direct pe RSA, folosit în TLS 1.2 vechi) sunt considerate mai slabe: acolo, secretul era criptat direct cu cheia publică pe termen lung a serverului, deci compromiterea acesteia ulterior permite decriptarea retroactivă a **oricărei** conversații înregistrate anterior.
 
 ## Record Protocol
 
@@ -211,16 +211,6 @@ nmap --script ssl-enum-ciphers -p 443 exemplu.ro
 
 ## Exerciții
 
-Următoarele exerciții sunt strict practice, cu unelte reale (`openssl`, `nmap`, `Wireshark`). Soluțiile sunt ascunse implicit — apasă pe fiecare pentru a le vedea.
-
-!!! warning "Reguli obligatorii înainte de a începe"
-    Exercițiile de mai jos, în special cele legate de `SSLKEYLOGFILE`, decriptează traficul **propriului tău browser**, pornit **de tine**, pe **propriul calculator**. Respectă strict aceste limite:
-
-    - Folosește **doar** un cont de test, propriu, nu contul altcuiva și nu date reale sensibile.
-    - Nu rula aceste exerciții pe calculatoare partajate, ale altcuiva sau ale unei instituții, fără acord explicit.
-    - Fișierul de chei (`SSLKEYLOGFILE`) este la fel de sensibil ca o parolă în clar — orice persoană care îl obține poate decripta întreg traficul capturat cât timp acel fișier a fost activ. Șterge-l imediat după exercițiu.
-    - Scopul este să înțelegi **de ce** TLS protejează doar traficul din rețea, nu și punctul final (dispozitivul tău) — nu să interceptezi traficul altor persoane. Așa ceva este ilegal fără autorizare explicită.
-
 ??? question "Exercițiul 1 — Inspectarea unui server real"
     Folosind `openssl s_client`, conectează-te la un server HTTPS la alegere (de exemplu `openssl s_client -connect example.com:443`) și identifică:
 
@@ -274,7 +264,7 @@ Următoarele exerciții sunt strict practice, cu unelte reale (`openssl`, `nmap`
         Pachetele care înainte apăreau ca `Application Data` (opac, criptat) sunt acum decodate de Wireshark ca `HTTP` sau `HTTP2`, cu conținutul vizibil în clar. Poți confirma că decriptarea funcționează verificând coloana `Protocol` — dacă apare `TLSv1.3` cu conținut ilizibil, fișierul de chei nu este configurat corect sau captura a fost pornită după ce browserul s-a conectat deja.
 
 ??? question "Exercițiul 5 — Observarea unei autentificări"
-    Folosind **doar contul tău de test propriu**, repetă captura de la exercițiul 4 în timp ce te autentifici pe un site precum `facebook.com`. În Wireshark, filtrează după `http.request.method == "POST"`, găsește cererea de login și folosește **Follow → HTTP Stream** pentru a vedea corpul cererii decriptat.
+    Folosind **doar contul tău de test propriu**, repetă captura de la exercițiul 4 în timp ce te autentifici pe un site precum `facebook.com`. În Wireshark, filtrează după `http.request.method == "POST"`, găsește cererea de login și folosește **Follow → HTTP Stream** pentru a vedea corpul cererii decriptat. Recomandare: Folositi o platforma care nu foloseste protocolul **QUIC** pentru transmiterea datelor.
 
     ??? success "Ce demonstrează acest exercițiu"
         Chiar dacă conexiunea este TLS de la un capăt la altul, câmpurile din formularul de login (adresă de e-mail, parolă) apar în clar în corpul cererii POST, pentru că decriptarea are loc chiar pe mașina ta, unde ai acces legitim la chei. Asta arată exact granița de securitate a TLS: protocolul garantează că nimeni **din rețea** nu poate citi datele, dar nu poate proteja datele față de **punctul final** care le deține deja necriptate (browser, sistem de operare, sau orice proces cu drepturi suficiente pe acel dispozitiv) — motiv pentru care malware sau extensii de browser rău-intenționate care rulează local pot seta `SSLKEYLOGFILE` fără știrea utilizatorului și exfiltra credențiale, independent de cât de puternic este TLS-ul folosit.

@@ -47,6 +47,7 @@ Copyright &copy; 2026 The authors
 nav = [
   { "Protocolul TLS" = "TLS.md" },
   { "Code review și buffer overflow" = "code-review.md" },
+  { "Buffer overflow" = "buffer-overflow.md" },
   { "Get started" = "index.md" },
   { "Markdown in 5min" = "markdown.md" }
 ]

@@ -4,6 +4,113 @@
   justify-content: center;
 }
 
+/* ==========================================================================
+   Stack / memory diagrams
+   Contiguous rectangles ("slots") that represent real memory layout,
+   with no arrows between them. Colors mirror the legend in the
+   buffer-overflow lab.
+   ========================================================================== */
+
+.mem {
+  border: 2px solid #94a3b8;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 1.25rem 0;
+  max-width: 760px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.mem.v {
+  display: block;
+}
+
+.mem.h {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.slot {
+  padding: 0.55rem 0.8rem;
+  color: #1e293b;
+  font-size: 0.82rem;
+  line-height: 1.3;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.15);
+}
+
+.mem.v > .slot:last-child {
+  border-bottom: none;
+}
+
+.mem.h > .slot {
+  flex: 1 1 auto;
+  border-bottom: none;
+  border-right: 1px solid rgba(15, 23, 42, 0.15);
+}
+
+.mem.h > .slot:last-child {
+  border-right: none;
+}
+
+.slot .addr {
+  display: block;
+  font-family: monospace;
+  font-size: 0.72rem;
+  opacity: 0.7;
+}
+
+.slot .tag {
+  float: right;
+  font-size: 0.72rem;
+  opacity: 0.75;
+}
+
+/* Colors — the same meaning everywhere (see the lab legend). */
+.slot.code   { background: #e2e8f0; color: #1e293b; }
+.slot.data   { background: #dbeafe; color: #1e3a8a; }
+.slot.heap   { background: #cffafe; color: #155e75; }
+.slot.free   { background: #f1f5f9; color: #64748b; }
+.slot.stack  { background: #fee2e2; color: #991b1b; }
+.slot.loc    { background: #dbeafe; color: #1e3a8a; }
+.slot.ctl    { background: #fee2e2; color: #991b1b; }
+.slot.ebp    { background: #ffedd5; color: #9a3412; }
+.slot.arg    { background: #ede9fe; color: #4c1d95; }
+.slot.tgt    { background: #fef08a; color: #713f12; }
+.slot.ok     { background: #dcfce7; color: #166534; }
+.slot.bad    { background: #fca5a5; color: #7f1d1d; }
+.slot.pad    { background: #e2e8f0; color: #334155; }
+.slot.gadget { background: #ffedd5; color: #9a3412; }
+.slot.fake   { background: #f1f5f9; color: #64748b; }
+
+/* Two stacks side by side (before / after). */
+.mem-pair {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  align-items: flex-start;
+}
+
+.mem-pair > div {
+  flex: 1 1 280px;
+}
+
+.mem-title {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+}
+
+.mem-title.ok  { background: #dcfce7; color: #166534; }
+.mem-title.bad { background: #fca5a5; color: #7f1d1d; }
+
+.mem-note {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin-top: -0.75rem;
+}
+
 /* Invisible to a human reader, but still a real text node: gets copied
    along with the surrounding paragraph on select/copy. Used to embed
    canary phrases that flag AI-generated exercise answers. */

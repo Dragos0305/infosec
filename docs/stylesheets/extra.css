@@ -81,6 +81,55 @@
 .slot.gadget { background: #ffedd5; color: #9a3412; }
 .slot.fake   { background: #f1f5f9; color: #64748b; }
 
+/* ==========================================================================
+   Source ↔ assembly, side by side
+   Two columns that let the reader match a C statement to the instructions
+   the compiler emits for it. Collapses to a single column on narrow screens.
+   ========================================================================== */
+
+.cc-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  align-items: start;
+  margin: 1.25rem 0;
+}
+
+.cc-split > div {
+  min-width: 0; /* let code blocks shrink instead of overflowing the grid */
+}
+
+.cc-split .cc-head {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  margin-bottom: 0.4rem;
+}
+
+.cc-split .cc-head.src { background: #dbeafe; color: #1e3a8a; }
+.cc-split .cc-head.asm { background: #e2e8f0; color: #334155; }
+
+/* A small round badge used to tie a C line to its assembly (①, ②, ...). */
+.cc-step {
+  display: inline-block;
+  min-width: 1.3em;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.72rem;
+  padding: 0 0.35em;
+  border-radius: 999px;
+  background: #fef08a;
+  color: #713f12;
+}
+
+@media (max-width: 760px) {
+  .cc-split {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Two stacks side by side (before / after). */
 .mem-pair {
   display: flex;
